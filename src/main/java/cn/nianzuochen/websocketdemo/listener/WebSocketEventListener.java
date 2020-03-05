@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
-
 /**
  * 对 socket 的连接和断链事件进行监听，这样才能广播用户进来和出去等操作
  *
@@ -48,10 +47,4 @@ public class WebSocketEventListener {
             messagingTemplate.convertAndSend("/topic/public", chatMessage);
         }
     }
-
-
-
-
-
-
 }
