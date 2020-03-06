@@ -6,6 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class WebSocketDemo {
     public static void main(String[] args) {
-        SpringApplication.run(WebSocketDemo.class);
+        SpringApplication.run(WebSocketDemo.class, args);
     }
 }

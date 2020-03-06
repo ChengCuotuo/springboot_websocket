@@ -16,38 +16,31 @@ var colors = [
     '#ffc107', '#ff85af', '#FF9800', '#39bbb0'
 ];
 
-// connect() 函数使用 SocketJS  和 Stomp  客户端连接到我们在 Spring Boot 中配置的 /ws 端点
 function connect(event) {
     username = document.querySelector('#name').value.trim();
 
     if(username) {
-        // 隐藏用户名输入的文本框
         usernamePage.classList.add('hidden');
-        // 显示对话框
         chatPage.classList.remove('hidden');
 
-        // 连接在 config 中配置的 websocket 端点 ws
         var socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
 
-        // 连接，传递参数，指定连接成功和异常时候调用的方法
         stompClient.connect({}, onConnected, onError);
     }
-    // 该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）。
-    // 例如，如果 type 属性是 "submit"，在事件传播的任意阶段可以调用任意的事件句柄，通过调用该方法，可以阻止提交表单。
     event.preventDefault();
 }
 
-// 连接成功之后，客户端订阅 /topic/public，并通过向 /app/chat.addUser 目的地发送消息将该用户的名字告诉服务器
+
 function onConnected() {
-    // 订阅公共主题，设置 onMessageReceived 方法处理连接成功之后获取的信息
+    // Subscribe to the Public Topic
     stompClient.subscribe('/topic/public', onMessageReceived);
 
-    // 将用户名返回给服务器
+    // Tell your username to the server
     stompClient.send("/app/chat.addUser",
         {},
         JSON.stringify({sender: username, type: 'JOIN'})
-    );
+    )
 
     connectingElement.classList.add('hidden');
 }
@@ -61,19 +54,21 @@ function onError(error) {
 
 function sendMessage(event) {
     var messageContent = messageInput.value.trim();
+
     if(messageContent && stompClient) {
         var chatMessage = {
             sender: username,
             content: messageInput.value,
             type: 'CHAT'
         };
+
         stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
         messageInput.value = '';
     }
     event.preventDefault();
 }
 
-// 指定这个方法来处理收到的信息
+
 function onMessageReceived(payload) {
     var message = JSON.parse(payload.body);
 
@@ -117,10 +112,10 @@ function getAvatarColor(messageSender) {
     for (var i = 0; i < messageSender.length; i++) {
         hash = 31 * hash + messageSender.charCodeAt(i);
     }
+
     var index = Math.abs(hash % colors.length);
     return colors[index];
 }
 
-// 添加两个 form 表单点击的事件监听
 usernameForm.addEventListener('submit', connect, true)
 messageForm.addEventListener('submit', sendMessage, true)

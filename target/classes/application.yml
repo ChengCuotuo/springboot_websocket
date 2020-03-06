@@ -1,0 +1,20 @@
+server:
+  port: 8806
+
+# 配置 redis
+spring:
+  redis:
+    host: 127.0.0.1
+    port: 6397
+    database: 0
+    password:
+    ssl: false
+    jedis:
+      pool:
+        max-idle: 10
+        max-wait: 60000
+
+# redis channel
+redis:
+  channel:
+    msgToAll: websocket.msgToAll

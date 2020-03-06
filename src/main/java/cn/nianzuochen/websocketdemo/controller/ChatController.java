@@ -26,7 +26,7 @@ public class ChatController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChatController.class);
 
-    @Value("redis.channel.msgToAll")
+    @Value("${redis.channel.msgToAll}")
     private String msgToAll;
 
     @Autowired
