@@ -25,6 +25,7 @@ function connect(event) {
         chatPage.classList.remove('hidden');
 
         var socket = new SockJS('/ws');
+        // 使用 Stomp 的文本协议封装 socket 对象
         stompClient = Stomp.over(socket);
 
         // 连接，传递参数，指定连接成功和异常时候调用的方法

@@ -25,4 +25,9 @@ public class ChatService {
         LOGGER.info("Send msg by simpMessageSendingOperations: " + chatMessage);
         simpMessageSendingOperations.convertAndSend("/topic/public", chatMessage);
     }
+
+    public void alertUserStatus(@Payload ChatMessage chatMessage) {
+        LOGGER.info("Alert user online by simpMessageSendingOperations： " + chatMessage.toString());
+        simpMessageSendingOperations.convertAndSend("/topic/public", chatMessage);
+    }
 }

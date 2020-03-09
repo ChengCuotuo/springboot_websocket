@@ -24,6 +24,9 @@ public class RedisListenerHandle extends MessageListenerAdapter {
     @Value("${redis.channel.msgToAll}")
     private String msgToAll;
 
+    @Value("${redis.channel.userStatus}")
+    private String userStatus;
+
     @Value("${server.port}")
     private String serverPort;
 
@@ -63,6 +66,11 @@ public class RedisListenerHandle extends MessageListenerAdapter {
             ChatMessage chatMessage = JsonUtil.parseJsonToObj(rawMsg, ChatMessage.class);
             // 发送信息给所有在线用户
             chatService.sendMsg(chatMessage);
+        }  else if (userStatus.equals(topic)) {
+            ChatMessage chatMessage = JsonUtil.parseJsonToObj(rawMsg, ChatMessage.class);
+            if (chatMessage != null) {
+                chatService.alertUserStatus(chatMessage);
+            }
         } else {
             LOGGER.warn("No further operation with this topic!");
         }

@@ -29,6 +29,9 @@ public class ChatController {
     @Value("${redis.channel.msgToAll}")
     private String msgToAll;
 
+    @Value("${redis.set.onlineUsers}")
+    private String onlineUsers;
+
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
@@ -68,11 +71,14 @@ public class ChatController {
 
     @MessageMapping("/chat.addUser")
     @SendTo("/topic/public")
-    public ChatMessage addUser(@Payload  ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
+    public void addUser(@Payload  ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
         // Add username in web socket session
         LOGGER.info("username: " + chatMessage.getSender());
-        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
-        return chatMessage;
+        try {
+            headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
+            redisTemplate.opsForSet().add(onlineUsers, chatMessage.getSender());
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
     }
-
 }

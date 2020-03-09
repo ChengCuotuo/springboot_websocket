@@ -1,10 +1,13 @@
 package cn.nianzuochen.websocketdemo.listener;
 
 import cn.nianzuochen.websocketdemo.model.ChatMessage;
+import cn.nianzuochen.websocketdemo.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
@@ -22,14 +25,23 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
  */
 @Component
 public class WebSocketEventListener {
-    private static final Logger logger = LoggerFactory.getLogger(WebSocketEventListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketEventListener.class);
 
     @Autowired
     private SimpMessageSendingOperations messagingTemplate;
 
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+
+    @Value("${redis.set.onlineUsers}")
+    private String onlineUsers;
+
+    @Value("${redis.channel.userStatus}")
+    private String userStatus;
+
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
-        logger.info("Received a new web socket connection");
+        LOGGER.info("Received a new web socket connection");
     }
 
     @EventListener
@@ -37,14 +49,20 @@ public class WebSocketEventListener {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
         String username = (String)headerAccessor.getSessionAttributes().get("username");
+
         if (username != null) {
-            logger.info("User Disconnected: " + username);
+            LOGGER.info("User Disconnected: " + username);
 
             ChatMessage chatMessage = new ChatMessage();
             chatMessage.setType(ChatMessage.MessageType.LEAVE);
             chatMessage.setSender(username);
 
-            messagingTemplate.convertAndSend("/topic/public", chatMessage);
+            try {
+                redisTemplate.opsForSet().remove(onlineUsers, username);
+                redisTemplate.convertAndSend(userStatus, JsonUtil.parseObjToJson(chatMessage));
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            }
         }
     }
 }
