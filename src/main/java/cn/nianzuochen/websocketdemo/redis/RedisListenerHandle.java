@@ -40,6 +40,8 @@ public class RedisListenerHandle extends MessageListenerAdapter {
      */
     @Override
     public void onMessage(Message message, byte[] pattern) {
+        // redisTemplate.convertAndSend 消息存储再 redis 的时候，首先使用的 Json 字符串，然后使用的 redisTemplete 进行
+        // 了默认的编码，现在也需要进行转换
         byte[] body = message.getBody();
         byte[] channel = message.getChannel();
 
@@ -59,7 +61,7 @@ public class RedisListenerHandle extends MessageListenerAdapter {
         if (msgToAll.equals(topic)) {
             LOGGER.info("Send message to all users:" + rawMsg);
             ChatMessage chatMessage = JsonUtil.parseJsonToObj(rawMsg, ChatMessage.class);
-            // 发送罅隙给所有在线用户
+            // 发送信息给所有在线用户
             chatService.sendMsg(chatMessage);
         } else {
             LOGGER.warn("No further operation with this topic!");

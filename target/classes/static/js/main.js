@@ -21,12 +21,9 @@ function connect(event) {
     username = document.querySelector('#name').value.trim();
 
     if(username) {
-        // 隐藏用户名输入的文本框
         usernamePage.classList.add('hidden');
-        // 显示对话框
         chatPage.classList.remove('hidden');
 
-        // 连接在 config 中配置的 websocket 端点 ws
         var socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
 
@@ -40,14 +37,14 @@ function connect(event) {
 
 // 连接成功之后，客户端订阅 /topic/public，并通过向 /app/chat.addUser 目的地发送消息将该用户的名字告诉服务器
 function onConnected() {
-    // 订阅公共主题，设置 onMessageReceived 方法处理连接成功之后获取的信息
+    // Subscribe to the Public Topic，调用 onMessageReceived 方法处理连接成功之后获取的信息
     stompClient.subscribe('/topic/public', onMessageReceived);
 
-    // 将用户名返回给服务器
+    // Tell your username to the server
     stompClient.send("/app/chat.addUser",
         {},
         JSON.stringify({sender: username, type: 'JOIN'})
-    );
+    )
 
     connectingElement.classList.add('hidden');
 }
@@ -73,7 +70,7 @@ function sendMessage(event) {
     event.preventDefault();
 }
 
-// 指定这个方法来处理收到的信息
+
 function onMessageReceived(payload) {
     var message = JSON.parse(payload.body);
 
